@@ -693,7 +693,7 @@ const dictionnaireGeant = [
     { arabe: "بَكَى", francais: "Pleurer" },
     // --- LOGIQUE ET ARGUMENTATION (الْمَنْطِقُ) ---
     { arabe: "سَبَبٌ", francais: "Raison / Cause" },
-    { arabe: "تِيجَةٌ", francais: "Résultat" },
+    { arabe: "نتيجة", francais: "Résultat" },
     { arabe: "مِثَالٌ", francais: "Exemple" },
     { arabe: "دَلِيلٌ", francais: "Preuve / Guide" },
     { arabe: "رَأْيٌ", francais: "Avis / Opinion" },

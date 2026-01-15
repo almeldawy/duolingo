@@ -3,240 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Arabe">
-    
-    <title>Arabe Premium - Quiz & Streak</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0a0f1a">
+    <title>Arabe Duolingo Style</title>
     
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         :root {
-            --bg: #0a0f1a; 
-            --card-front: #1e293b; 
-            --accent: #fbbf24; 
-            --text-main: #ffffff; 
-            --border: rgba(255, 255, 255, 0.15); 
-            --input-bg: #162033;
-            --streak: #ff9600;
+            --bg: #0a0f1a; --card-front: #1e293b; --accent: #fbbf24; 
+            --text-main: #ffffff; --border: rgba(255, 255, 255, 0.15); 
+            --input-bg: #162033; --streak: #ff9600; --heart: #ef4444;
         }
 
         [data-theme="light"] {
-            --bg: #f8f9fa; 
-            --card-front: #ffffff; 
-            --accent: #b45309; 
-            --text-main: #1e293b; 
-            --border: rgba(0, 0, 0, 0.1); 
-            --input-bg: #ffffff;
+            --bg: #f8f9fa; --card-front: #ffffff; --accent: #b45309; 
+            --text-main: #1e293b; --border: rgba(0, 0, 0, 0.1); --input-bg: #ffffff;
         }
 
-        html, body { 
-            height: 100%; margin: 0; padding: 0; 
-            overflow: hidden; background-color: var(--bg); 
-            width: 100vw;
-        }
+        html, body { height: 100%; margin: 0; background-color: var(--bg); overflow: hidden; width: 100vw; }
+        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: env(safe-area-inset-top) 10px 20px 10px; }
 
-        body { 
-            font-family: 'Inter', system-ui, sans-serif; 
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: env(safe-area-inset-top) 10px max(20px, env(safe-area-inset-bottom)) 10px;
-            touch-action: none;
-        }
-
-        /* STREAK (FLAMME) */
-        #streak-container {
-            position: fixed; top: 60px; right: 20px; z-index: 1000;
-            font-weight: 800; color: var(--streak);
-            display: flex; align-items: center; gap: 5px; font-size: 20px;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        /* HEADER & STATUS */
+        .header-nav { width: 100%; max-width: 400px; display: flex; align-items: center; gap: 8px; margin-top: 15px; }
+        .stats-bar { width: 100%; max-width: 400px; display: flex; justify-content: space-between; padding: 10px; font-weight: bold; }
+        #hearts { color: var(--heart); letter-spacing: 5px; font-size: 20px; }
+        #streak-display { color: var(--streak); font-size: 20px; transition: 0.3s; }
 
         /* BARRE DE PROGRESSION */
-        .progress-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 6px;
-            background: rgba(128,128,128,0.1); z-index: 2000;
-        }
+        .progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 6px; background: rgba(128,128,128,0.1); }
         #progress-bar { height: 100%; width: 0%; background: var(--accent); transition: 0.5s; }
 
-        /* NAVIGATION HAUTE */
-        .header-nav { 
-            width: 100%; max-width: 400px; display: flex; align-items: center; 
-            gap: 8px; margin-top: 15px; z-index: 100;
-        }
-
-        .btn-tool {
-            width: 42px; height: 42px; border-radius: 12px;
-            background: var(--input-bg); border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 18px; color: var(--text-main);
-        }
-
-        #recherche {
-            flex: 1; height: 42px; padding: 0 15px;
-            background: var(--input-bg); border: 1px solid var(--border);
-            border-radius: 12px; color: var(--text-main); font-size: 16px; outline: none;
-        }
-
-        /* ZONE DE LA CARTE */
-        .card-container { 
-            perspective: 2000px; width: 100%; max-width: 340px; 
-            flex-grow: 1; max-height: 35vh; min-height: 180px; margin: 20px 0; 
-        }
-        
-        #card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        /* CARTE */
+        .card-container { perspective: 2000px; width: 100%; max-width: 340px; flex-grow: 1; max-height: 35vh; margin: 20px 0; }
+        #card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s; }
         #card.flipped { transform: rotateY(180deg); }
-
-        .face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 30px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; border: 1px solid var(--border);
-            background: var(--card-front); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
+        .face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card-front); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .back { transform: rotateY(180deg); }
-        .arabic { font-size: clamp(40px, 15vw, 80px); font-weight: 800; color: var(--accent); text-align: center; }
-        .translation { font-size: clamp(24px, 8vw, 36px); font-weight: 700; color: var(--accent); text-align: center; }
+        .arabic { font-size: 50px; font-weight: 800; color: var(--accent); }
+        .translation { font-size: 30px; font-weight: 700; color: var(--accent); }
 
-        /* ZONE DU QUIZ */
-        #quiz-options {
-            display: flex; gap: 10px; width: 100%; max-width: 380px; margin-bottom: 20px;
-        }
-
-        .quiz-btn {
-            flex: 1; padding: 18px 5px; border-radius: 18px;
-            border: 2px solid var(--border); border-bottom-width: 5px;
-            background: var(--card-front); color: var(--text-main);
-            font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.1s;
-        }
+        /* QUIZ */
+        #quiz-options { display: flex; gap: 10px; width: 100%; max-width: 380px; margin-bottom: 20px; }
+        .quiz-btn { flex: 1; padding: 18px 5px; border-radius: 18px; border: 2px solid var(--border); border-bottom-width: 5px; background: var(--card-front); color: var(--text-main); font-weight: bold; cursor: pointer; }
         .quiz-btn:active { border-bottom-width: 2px; transform: translateY(3px); }
-
         .correct { background-color: #22c55e !important; border-color: #16a34a !important; color: white !important; }
-        .wrong { 
-            background-color: #ef4444 !important; border-color: #dc2626 !important; color: white !important;
-            animation: shake 0.3s;
-        }
+        .wrong { background-color: #ef4444 !important; border-color: #dc2626 !important; color: white !important; animation: shake 0.3s; }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        
+        #bravo-msg { display:none; position:fixed; top:40%; left:50%; transform:translate(-50%, -50%); z-index:4000; font-size:40px; font-weight:900; color:var(--accent); pointer-events:none; }
+        @keyframes popup { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
 
-        /* BAS DE PAGE */
-        .bottom-section { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .controls { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 320px; }
-
-        .btn-circle {
-            width: 50px; height: 50px; border-radius: 15px;
-            background: var(--card-front); border: 1px solid var(--border);
-            color: var(--text-main); font-size: 20px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .btn-mix {
-            padding: 10px 25px; border-radius: 30px;
-            background: rgba(251, 191, 36, 0.1); border: 1px solid var(--accent);
-            color: var(--accent); font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer;
-        }
-
-        #count { font-size: 12px; font-weight: bold; color: var(--accent); opacity: 0.8; }
-        .fav-badge { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; z-index: 10; }
-
-        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
-        .modal-content { background: var(--card-front); margin: 20% auto; padding: 25px; border: 1px solid var(--accent); border-radius: 25px; width: 85%; max-width: 350px; text-align: center; color: var(--text-main); position: relative; }
-        .close { position: absolute; top: 10px; right: 15px; color: var(--accent); font-size: 24px; cursor: pointer; }
+        /* CONTROLES */
+        .btn-tool { width: 42px; height: 42px; border-radius: 12px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        #recherche { flex: 1; height: 42px; padding: 0 15px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); }
+        .controls { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 320px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="progress-container"><div id="progress-bar"></div></div>
-
-    <div id="streak-container">
-        <span id="streak-count">0</span> 🔥
+    
+    <div class="stats-bar">
+        <div id="hearts">❤️❤️❤️</div>
+        <div id="streak-display">0 🔥</div>
     </div>
 
     <div class="header-nav">
-        <div class="btn-tool" onclick="toggleInfo()">ℹ️</div>
         <input type="text" id="recherche" placeholder="Rechercher..." oninput="filtrer()">
         <div class="btn-tool" onclick="toggleTheme()" id="theme-icon">🌙</div>
     </div>
 
-    <div id="info-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="toggleInfo()">&times;</span>
-            <h2 style="color: var(--accent)">Objectif</h2>
-            <p>Trouve la traduction arabe. Chaque bonne réponse augmente ta série 🔥. Si tu te trompes, tu reviens à 0 !</p>
-        </div>
-    </div>
+    <div id="bravo-msg">INCROYABLE ! 🔥</div>
 
     <div class="card-container">
         <div id="card">
-            <div class="face front">
-                <div class="fav-badge" id="fav-icon" onclick="toggleFavori(event)">🤍</div>
-                <div class="arabic" id="ar">...</div>
-            </div>
-            <div class="face back">
-                <div class="translation" id="fr">...</div>
-            </div>
+            <div class="face front"><div class="arabic" id="ar">...</div></div>
+            <div class="face back"><div class="translation" id="fr">...</div></div>
         </div>
     </div>
 
-    <div class="bottom-section">
-        <div id="quiz-options"></div>
-        
-        <div id="count">0 / 0</div>
-        <div class="controls">
-            <button class="btn-circle" onclick="change(-1)">⬅️</button>
-            <button class="btn-mix" onclick="melanger()">MIX</button>
-            <button class="btn-circle" onclick="change(1)">➡️</button>
-        </div>
+    <div id="quiz-options"></div>
+
+    <div class="controls">
+        <button class="btn-tool" onclick="change(-1)">⬅️</button>
+        <button id="count" style="color:var(--accent); font-size:12px; font-weight:bold;">0 / 0</button>
+        <button class="btn-tool" onclick="change(1)">➡️</button>
     </div>
 
     <script src="donnees.js"></script>
     <script>
-        // --- VARIABLES GLOBALES ---
-        let index = 0, liste = [], favoris = JSON.parse(localStorage.getItem('favoris')) || [], streak = 0;
+        let index = 0, liste = [], streak = 0, vies = 3;
 
-        // --- SONS ---
         function jouerSon(type) {
             try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = context.createOscillator();
-                const gain = context.createGain();
-                osc.connect(gain); gain.connect(context.destination);
-                if (type === 'correct') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523, context.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(783, context.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.1, context.currentTime);
-                } else {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(110, context.currentTime);
-                    gain.gain.setValueAtTime(0.05, context.currentTime);
-                }
-                osc.start(); osc.stop(context.currentTime + 0.2);
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.connect(g); g.connect(ctx.destination);
+                osc.type = (type === 'correct') ? 'sine' : 'sawtooth';
+                osc.frequency.setValueAtTime((type === 'correct' ? 523 : 110), ctx.currentTime);
+                g.gain.setValueAtTime(0.1, ctx.currentTime);
+                osc.start(); osc.stop(ctx.currentTime + 0.2);
             } catch(e) {}
         }
 
-        // --- THEME ---
-        function appliquerTheme() {
-            const t = localStorage.getItem('theme') || 'dark';
-            document.body.setAttribute('data-theme', t);
-            document.getElementById('theme-icon').textContent = (t === 'dark') ? '🌙' : '☀️';
-            document.querySelector('meta[name="theme-color"]').setAttribute('content', (t === 'dark' ? '#0a0f1a' : '#f8f9fa'));
-        }
-        function toggleTheme() {
-            const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', n); appliquerTheme();
-        }
-
-        // --- LOGIQUE CORE ---
         function charger() {
             if (typeof dictionnaireGeant !== 'undefined') {
                 liste = [...dictionnaireGeant].sort(() => Math.random() - 0.5);
@@ -252,8 +122,6 @@
             document.getElementById('fr').textContent = m.francais;
             document.getElementById('count').textContent = (index + 1) + " / " + liste.length;
             document.getElementById('progress-bar').style.width = ((index + 1) / liste.length * 100) + "%";
-            document.getElementById('fav-icon').textContent = favoris.some(f => f.arabe === m.arabe) ? "❤️" : "🤍";
-            
             genererQuiz(m.francais);
         }
 
@@ -271,51 +139,56 @@
                 const btn = document.createElement('button');
                 btn.className = "quiz-btn";
                 btn.textContent = texte;
-                btn.onclick = () => {
-                    if (texte === bonneReponse) {
-                        if (!btn.classList.contains('correct')) {
-                            btn.classList.add('correct');
-                            jouerSon('correct');
-                            streak++;
-                            MAJStreak();
-                            setTimeout(() => document.getElementById('card').classList.add('flipped'), 200);
-                        }
-                    } else {
-                        if (!btn.classList.contains('wrong')) {
-                            btn.classList.add('wrong');
-                            jouerSon('wrong');
-                            streak = 0;
-                            MAJStreak();
-                        }
-                    }
-                };
+                btn.onclick = () => verifier(btn, texte, bonneReponse);
                 container.appendChild(btn);
             });
         }
 
-        function MAJStreak() {
-            const el = document.getElementById('streak-count');
-            const cont = document.getElementById('streak-container');
-            el.textContent = streak;
-            cont.style.transform = "scale(1.4)";
-            setTimeout(() => cont.style.transform = "scale(1)", 200);
+        function verifier(btn, texte, bonne) {
+            if (vies <= 0) return; // Bloque si Game Over
+
+            if (texte === bonne) {
+                btn.classList.add('correct');
+                jouerSon('correct');
+                streak++;
+                if (streak % 10 === 0) animerBravo();
+                MAJStats();
+                setTimeout(() => { document.getElementById('card').classList.add('flipped'); }, 200);
+            } else {
+                if (!btn.classList.contains('wrong')) {
+                    btn.classList.add('wrong');
+                    jouerSon('wrong');
+                    vies--;
+                    if (vies <= 0) {
+                        alert("Game Over ! Ta série retombe à 0.");
+                        vies = 3; streak = 0;
+                    }
+                    MAJStats();
+                }
+            }
+        }
+
+        function MAJStats() {
+            document.getElementById('streak-display').textContent = streak + " 🔥";
+            document.getElementById('hearts').textContent = "❤️".repeat(vies) + "🖤".repeat(3 - vies);
+            const s = document.getElementById('streak-display');
+            s.style.transform = "scale(1.3)";
+            setTimeout(() => s.style.transform = "scale(1)", 200);
+        }
+
+        function animerBravo() {
+            const b = document.getElementById('bravo-msg');
+            b.style.display = "block";
+            b.style.animation = "popup 1s forwards";
+            setTimeout(() => b.style.display = "none", 1000);
         }
 
         function change(d) { index = (index + d + liste.length) % liste.length; MAJ(); }
-        function melanger() { liste.sort(() => Math.random() - 0.5); index = 0; streak = 0; MAJStreak(); MAJ(); }
         
-        function toggleFavori(e) {
-            e.stopPropagation();
-            const m = liste[index];
-            const i = favoris.findIndex(f => f.arabe === m.arabe);
-            if (i > -1) favoris.splice(i, 1); else favoris.push(m);
-            localStorage.setItem('favoris', JSON.stringify(favoris));
-            document.getElementById('fav-icon').textContent = i > -1 ? "🤍" : "❤️";
-        }
-
-        function toggleInfo() {
-            const m = document.getElementById('info-modal');
-            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+        function toggleTheme() {
+            const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', t);
+            localStorage.setItem('theme', t);
         }
 
         function filtrer() {
@@ -324,7 +197,10 @@
             index = 0; MAJ();
         }
 
-        window.onload = () => { appliquerTheme(); charger(); };
+        window.onload = () => { 
+            if(localStorage.getItem('theme')) document.body.setAttribute('data-theme', localStorage.getItem('theme'));
+            charger(); 
+        };
     </script>
 </body>
 </html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Arabe">
+    
+    <title>Arabe Premium - Quiz</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0f1a">
+    
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        :root {
+            --bg: #0a0f1a; 
+            --card-front: #1e293b; 
+            --accent: #fbbf24; 
+            --text-main: #ffffff; 
+            --border: rgba(255, 255, 255, 0.15); 
+            --input-bg: #162033;
+        }
+
+        [data-theme="light"] {
+            --bg: #f8f9fa; 
+            --card-front: #ffffff; 
+            --accent: #b45309; 
+            --text-main: #1e293b; 
+            --border: rgba(0, 0, 0, 0.1); 
+            --input-bg: #ffffff;
+        }
+
+        html, body { 
+            height: 100%; margin: 0; padding: 0; 
+            overflow: hidden; background-color: var(--bg); 
+            width: 100vw;
+        }
+
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            padding: env(safe-area-inset-top) 10px max(20px, env(safe-area-inset-bottom)) 10px;
+            touch-action: none;
+        }
+
+        /* BARRE DE PROGRESSION */
+        .progress-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 4px;
+            background: rgba(128,128,128,0.1); z-index: 2000;
+        }
+        #progress-bar { height: 100%; width: 0%; background: var(--accent); transition: 0.5s; }
+
+        /* NAVIGATION HAUTE */
+        .header-nav { 
+            width: 100%; max-width: 400px; display: flex; align-items: center; 
+            gap: 8px; margin-top: 10px; z-index: 100;
+        }
+
+        .btn-tool {
+            width: 42px; height: 42px; min-width: 42px; border-radius: 12px;
+            background: var(--input-bg); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 18px; color: var(--text-main);
+        }
+
+        #recherche {
+            flex: 1; min-width: 0; height: 42px; padding: 0 15px;
+            background: var(--input-bg); border: 1px solid var(--border);
+            border-radius: 12px; color: var(--text-main); font-size: 16px; outline: none;
+        }
+
+        /* ZONE DE LA CARTE */
+        .card-container { 
+            perspective: 2000px; width: 100%; max-width: 340px; 
+            flex-grow: 1; max-height: 40vh; min-height: 200px; margin: 15px 0; 
+        }
+        
+        #card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        #card.flipped { transform: rotateY(180deg); }
+
+        .face {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 30px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; border: 1px solid var(--border);
+            background: var(--card-front); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .back { transform: rotateY(180deg); }
+
+        .arabic { font-size: clamp(35px, 12vw, 70px); font-weight: 800; color: var(--accent); text-align: center; }
+        .translation { font-size: clamp(22px, 8vw, 32px); font-weight: 700; text-align: center; color: var(--accent); }
+
+        /* ZONE DU QUIZ */
+        #quiz-options {
+            display: flex; gap: 10px; width: 100%; max-width: 380px; margin-bottom: 20px;
+        }
+
+        .quiz-btn {
+            flex: 1; padding: 15px 5px; border-radius: 15px;
+            border: 2px solid var(--border); background: var(--card-front);
+            color: var(--text-main); font-weight: bold; font-size: 14px;
+            cursor: pointer; transition: 0.2s; text-align: center;
+        }
+
+        .correct { background-color: #22c55e !important; color: white !important; border-color: #16a34a !important; }
+        .wrong { 
+            background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* BAS DE PAGE */
+        .bottom-section { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .controls { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 320px; }
+
+        .btn-circle {
+            width: 50px; height: 50px; border-radius: 15px;
+            background: var(--card-front); border: 1px solid var(--border);
+            color: var(--text-main); font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .btn-mix {
+            padding: 10px 20px; border-radius: 30px;
+            background: rgba(251, 191, 36, 0.1); border: 1px solid var(--accent);
+            color: var(--accent); font-size: 11px; font-weight: 800;
+            letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+        }
+
+        #count { font-size: 12px; font-weight: bold; color: var(--accent); opacity: 0.8; }
+        .fav-badge { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; z-index: 10; }
+
+        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card-front); margin: 20% auto; padding: 25px; border: 1px solid var(--accent); border-radius: 25px; width: 85%; max-width: 350px; text-align: center; color: var(--text-main); position: relative; }
+        .close { position: absolute; top: 10px; right: 15px; color: var(--accent); font-size: 24px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="header-nav">
+        <div class="btn-tool" onclick="toggleInfo()">ℹ️</div>
+        <input type="text" id="recherche" placeholder="Rechercher..." oninput="filtrer()">
+        <div class="btn-tool" onclick="toggleTheme()" id="theme-icon">🌙</div>
+    </div>
+
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="toggleInfo()">&times;</span>
+            <h2 style="color: var(--accent)">Mode Quiz</h2>
+            <p>Choisis la bonne traduction en bas pour retourner la carte !</p>
+        </div>
+    </div>
+
+    <div class="card-container">
+        <div id="card">
+            <div class="face front">
+                <div class="fav-badge" id="fav-icon" onclick="toggleFavori(event)">🤍</div>
+                <div class="arabic" id="ar">...</div>
+            </div>
+            <div class="face back">
+                <div class="translation" id="fr">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-section">
+        <div id="quiz-options"></div>
+        
+        <div id="count">0 / 0</div>
+        <div class="controls">
+            <button class="btn-circle" onclick="change(-1)">⬅️</button>
+            <button class="btn-mix" onclick="melanger()">MIX</button>
+            <button class="btn-circle" onclick="change(1)">➡️</button>
+        </div>
+    </div>
+
+    <script src="donnees.js"></script>
+    <script>
+        // --- INITIALISATION ---
+        let index = 0, liste = [], favoris = JSON.parse(localStorage.getItem('favoris')) || [];
+
+        // --- SONS ---
+        function jouerSon(type) {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = context.createOscillator();
+                const gain = context.createGain();
+                osc.connect(gain);
+                gain.connect(context.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, context.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(783.99, context.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, context.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(110, context.currentTime);
+                    gain.gain.setValueAtTime(0.05, context.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+                }
+                osc.start();
+                osc.stop(context.currentTime + 0.3);
+            } catch(e) { console.log("Audio non supporté"); }
+        }
+
+        // --- THEME ---
+        function appliquerTheme() {
+            const t = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', t);
+            document.getElementById('theme-icon').textContent = (t === 'dark') ? '🌙' : '☀️';
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', (t === 'dark' ? '#0a0f1a' : '#f8f9fa'));
+        }
+        
+        function toggleTheme() {
+            const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', n); 
+            appliquerTheme();
+        }
+
+        // --- LOGIQUE DES CARTES ---
+        function charger() {
+            if (typeof dictionnaireGeant !== 'undefined') {
+                liste = [...dictionnaireGeant].sort(() => Math.random() - 0.5);
+                MAJ();
+            }
+        }
+
+        function MAJ() {
+            if (!liste.length) return;
+            const m = liste[index];
+            document.getElementById('card').classList.remove('flipped');
+            document.getElementById('ar').textContent = m.arabe;
+            document.getElementById('fr').textContent = m.francais;
+            document.getElementById('count').textContent = (index + 1) + " / " + liste.length;
+            document.getElementById('progress-bar').style.width = ((index + 1) / liste.length * 100) + "%";
+            document.getElementById('fav-icon').textContent = favoris.some(f => f.arabe === m.arabe) ? "❤️" : "🤍";
+
+            genererQuiz(m.francais);
+        }
+
+        function genererQuiz(bonneReponse) {
+            const container = document.getElementById('quiz-options');
+            container.innerHTML = "";
+            
+            let choix = [bonneReponse];
+            while (choix.length < 3 && dictionnaireGeant.length >= 3) {
+                let faux = dictionnaireGeant[Math.floor(Math.random() * dictionnaireGeant.length)].francais;
+                if (!choix.includes(faux)) choix.push(faux);
+            }
+            choix.sort(() => Math.random() - 0.5);
+
+            choix.forEach(texte => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-btn";
+                btn.textContent = texte;
+                btn.onclick = () => {
+                    if (texte === bonneReponse) {
+                        btn.classList.add('correct');
+                        jouerSon('correct');
+                        setTimeout(() => document.getElementById('card').classList.add('flipped'), 200);
+                    } else {
+                        btn.classList.add('wrong');
+                        jouerSon('wrong');
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function change(d) { index = (index + d + liste.length) % liste.length; MAJ(); }
+        function melanger() { liste.sort(() => Math.random() - 0.5); index = 0; MAJ(); }
+        
+        function toggleFavori(e) {
+            e.stopPropagation();
+            const m = liste[index];
+            const i = favoris.findIndex(f => f.arabe === m.arabe);
+            if (i > -1) favoris.splice(i, 1); else favoris.push(m);
+            localStorage.setItem('favoris', JSON.stringify(favoris));
+            document.getElementById('fav-icon').textContent = i > -1 ? "🤍" : "❤️";
+        }
+
+        function toggleInfo() {
+            const m = document.getElementById('info-modal');
+            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function filtrer() {
+            const s = document.getElementById('recherche').value.toLowerCase();
+            liste = dictionnaireGeant.filter(m => m.francais.toLowerCase().includes(s) || m.arabe.includes(s));
+            index = 0; MAJ();
+        }
+
+        // SWIPE
+        let startX = 0;
+        document.body.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        document.body.addEventListener('touchend', e => {
+            let diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) change(diff > 0 ? 1 : -1);
+        });
+
+        window.onload = () => { appliquerTheme(); charger(); };
+    </script>
+</body>
+</html>

@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Arabe">
     
-    <title>Arabe Premium - Quiz</title>
+    <title>Arabe Premium - Quiz & Streak</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0f1a">
     
@@ -23,6 +23,7 @@
             --text-main: #ffffff; 
             --border: rgba(255, 255, 255, 0.15); 
             --input-bg: #162033;
+            --streak: #ff9600;
         }
 
         [data-theme="light"] {
@@ -47,9 +48,17 @@
             touch-action: none;
         }
 
+        /* STREAK (FLAMME) */
+        #streak-container {
+            position: fixed; top: 60px; right: 20px; z-index: 1000;
+            font-weight: 800; color: var(--streak);
+            display: flex; align-items: center; gap: 5px; font-size: 20px;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
         /* BARRE DE PROGRESSION */
         .progress-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 4px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 6px;
             background: rgba(128,128,128,0.1); z-index: 2000;
         }
         #progress-bar { height: 100%; width: 0%; background: var(--accent); transition: 0.5s; }
@@ -57,18 +66,18 @@
         /* NAVIGATION HAUTE */
         .header-nav { 
             width: 100%; max-width: 400px; display: flex; align-items: center; 
-            gap: 8px; margin-top: 10px; z-index: 100;
+            gap: 8px; margin-top: 15px; z-index: 100;
         }
 
         .btn-tool {
-            width: 42px; height: 42px; min-width: 42px; border-radius: 12px;
+            width: 42px; height: 42px; border-radius: 12px;
             background: var(--input-bg); border: 1px solid var(--border);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; font-size: 18px; color: var(--text-main);
         }
 
         #recherche {
-            flex: 1; min-width: 0; height: 42px; padding: 0 15px;
+            flex: 1; height: 42px; padding: 0 15px;
             background: var(--input-bg); border: 1px solid var(--border);
             border-radius: 12px; color: var(--text-main); font-size: 16px; outline: none;
         }
@@ -76,7 +85,7 @@
         /* ZONE DE LA CARTE */
         .card-container { 
             perspective: 2000px; width: 100%; max-width: 340px; 
-            flex-grow: 1; max-height: 40vh; min-height: 200px; margin: 15px 0; 
+            flex-grow: 1; max-height: 35vh; min-height: 180px; margin: 20px 0; 
         }
         
         #card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -91,9 +100,8 @@
         }
 
         .back { transform: rotateY(180deg); }
-
-        .arabic { font-size: clamp(35px, 12vw, 70px); font-weight: 800; color: var(--accent); text-align: center; }
-        .translation { font-size: clamp(22px, 8vw, 32px); font-weight: 700; text-align: center; color: var(--accent); }
+        .arabic { font-size: clamp(40px, 15vw, 80px); font-weight: 800; color: var(--accent); text-align: center; }
+        .translation { font-size: clamp(24px, 8vw, 36px); font-weight: 700; color: var(--accent); text-align: center; }
 
         /* ZONE DU QUIZ */
         #quiz-options {
@@ -101,22 +109,23 @@
         }
 
         .quiz-btn {
-            flex: 1; padding: 15px 5px; border-radius: 15px;
-            border: 2px solid var(--border); background: var(--card-front);
-            color: var(--text-main); font-weight: bold; font-size: 14px;
-            cursor: pointer; transition: 0.2s; text-align: center;
+            flex: 1; padding: 18px 5px; border-radius: 18px;
+            border: 2px solid var(--border); border-bottom-width: 5px;
+            background: var(--card-front); color: var(--text-main);
+            font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.1s;
         }
+        .quiz-btn:active { border-bottom-width: 2px; transform: translateY(3px); }
 
-        .correct { background-color: #22c55e !important; color: white !important; border-color: #16a34a !important; }
+        .correct { background-color: #22c55e !important; border-color: #16a34a !important; color: white !important; }
         .wrong { 
-            background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important;
+            background-color: #ef4444 !important; border-color: #dc2626 !important; color: white !important;
             animation: shake 0.3s;
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
         }
 
         /* BAS DE PAGE */
@@ -131,10 +140,9 @@
         }
 
         .btn-mix {
-            padding: 10px 20px; border-radius: 30px;
+            padding: 10px 25px; border-radius: 30px;
             background: rgba(251, 191, 36, 0.1); border: 1px solid var(--accent);
-            color: var(--accent); font-size: 11px; font-weight: 800;
-            letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+            color: var(--accent); font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer;
         }
 
         #count { font-size: 12px; font-weight: bold; color: var(--accent); opacity: 0.8; }
@@ -149,6 +157,10 @@
 
     <div class="progress-container"><div id="progress-bar"></div></div>
 
+    <div id="streak-container">
+        <span id="streak-count">0</span> 🔥
+    </div>
+
     <div class="header-nav">
         <div class="btn-tool" onclick="toggleInfo()">ℹ️</div>
         <input type="text" id="recherche" placeholder="Rechercher..." oninput="filtrer()">
@@ -158,8 +170,8 @@
     <div id="info-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="toggleInfo()">&times;</span>
-            <h2 style="color: var(--accent)">Mode Quiz</h2>
-            <p>Choisis la bonne traduction en bas pour retourner la carte !</p>
+            <h2 style="color: var(--accent)">Objectif</h2>
+            <p>Trouve la traduction arabe. Chaque bonne réponse augmente ta série 🔥. Si tu te trompes, tu reviens à 0 !</p>
         </div>
     </div>
 
@@ -188,8 +200,8 @@
 
     <script src="donnees.js"></script>
     <script>
-        // --- INITIALISATION ---
-        let index = 0, liste = [], favoris = JSON.parse(localStorage.getItem('favoris')) || [];
+        // --- VARIABLES GLOBALES ---
+        let index = 0, liste = [], favoris = JSON.parse(localStorage.getItem('favoris')) || [], streak = 0;
 
         // --- SONS ---
         function jouerSon(type) {
@@ -197,24 +209,19 @@
                 const context = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = context.createOscillator();
                 const gain = context.createGain();
-                osc.connect(gain);
-                gain.connect(context.destination);
-
+                osc.connect(gain); gain.connect(context.destination);
                 if (type === 'correct') {
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, context.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(783.99, context.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(523, context.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(783, context.currentTime + 0.1);
                     gain.gain.setValueAtTime(0.1, context.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
                 } else {
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(110, context.currentTime);
                     gain.gain.setValueAtTime(0.05, context.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
                 }
-                osc.start();
-                osc.stop(context.currentTime + 0.3);
-            } catch(e) { console.log("Audio non supporté"); }
+                osc.start(); osc.stop(context.currentTime + 0.2);
+            } catch(e) {}
         }
 
         // --- THEME ---
@@ -224,14 +231,12 @@
             document.getElementById('theme-icon').textContent = (t === 'dark') ? '🌙' : '☀️';
             document.querySelector('meta[name="theme-color"]').setAttribute('content', (t === 'dark' ? '#0a0f1a' : '#f8f9fa'));
         }
-        
         function toggleTheme() {
             const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('theme', n); 
-            appliquerTheme();
+            localStorage.setItem('theme', n); appliquerTheme();
         }
 
-        // --- LOGIQUE DES CARTES ---
+        // --- LOGIQUE CORE ---
         function charger() {
             if (typeof dictionnaireGeant !== 'undefined') {
                 liste = [...dictionnaireGeant].sort(() => Math.random() - 0.5);
@@ -248,16 +253,15 @@
             document.getElementById('count').textContent = (index + 1) + " / " + liste.length;
             document.getElementById('progress-bar').style.width = ((index + 1) / liste.length * 100) + "%";
             document.getElementById('fav-icon').textContent = favoris.some(f => f.arabe === m.arabe) ? "❤️" : "🤍";
-
+            
             genererQuiz(m.francais);
         }
 
         function genererQuiz(bonneReponse) {
             const container = document.getElementById('quiz-options');
             container.innerHTML = "";
-            
             let choix = [bonneReponse];
-            while (choix.length < 3 && dictionnaireGeant.length >= 3) {
+            while (choix.length < 3) {
                 let faux = dictionnaireGeant[Math.floor(Math.random() * dictionnaireGeant.length)].francais;
                 if (!choix.includes(faux)) choix.push(faux);
             }
@@ -269,20 +273,36 @@
                 btn.textContent = texte;
                 btn.onclick = () => {
                     if (texte === bonneReponse) {
-                        btn.classList.add('correct');
-                        jouerSon('correct');
-                        setTimeout(() => document.getElementById('card').classList.add('flipped'), 200);
+                        if (!btn.classList.contains('correct')) {
+                            btn.classList.add('correct');
+                            jouerSon('correct');
+                            streak++;
+                            MAJStreak();
+                            setTimeout(() => document.getElementById('card').classList.add('flipped'), 200);
+                        }
                     } else {
-                        btn.classList.add('wrong');
-                        jouerSon('wrong');
+                        if (!btn.classList.contains('wrong')) {
+                            btn.classList.add('wrong');
+                            jouerSon('wrong');
+                            streak = 0;
+                            MAJStreak();
+                        }
                     }
                 };
                 container.appendChild(btn);
             });
         }
 
+        function MAJStreak() {
+            const el = document.getElementById('streak-count');
+            const cont = document.getElementById('streak-container');
+            el.textContent = streak;
+            cont.style.transform = "scale(1.4)";
+            setTimeout(() => cont.style.transform = "scale(1)", 200);
+        }
+
         function change(d) { index = (index + d + liste.length) % liste.length; MAJ(); }
-        function melanger() { liste.sort(() => Math.random() - 0.5); index = 0; MAJ(); }
+        function melanger() { liste.sort(() => Math.random() - 0.5); index = 0; streak = 0; MAJStreak(); MAJ(); }
         
         function toggleFavori(e) {
             e.stopPropagation();
@@ -303,14 +323,6 @@
             liste = dictionnaireGeant.filter(m => m.francais.toLowerCase().includes(s) || m.arabe.includes(s));
             index = 0; MAJ();
         }
-
-        // SWIPE
-        let startX = 0;
-        document.body.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-        document.body.addEventListener('touchend', e => {
-            let diff = startX - e.changedTouches[0].clientX;
-            if (Math.abs(diff) > 50) change(diff > 0 ? 1 : -1);
-        });
 
         window.onload = () => { appliquerTheme(); charger(); };
     </script>

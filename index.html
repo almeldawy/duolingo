@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Arabe Duolingo - Version Finale</title>
+    <title>Arabe Duolingo - Version Sécurisée</title>
     
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -35,7 +35,7 @@
         #recherche { flex: 1; height: 42px; padding: 0 15px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); font-size: 16px; outline: none; }
         .btn-tool { width: 42px; height: 42px; border-radius: 12px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-        /* CARTE (CORRIGÉE POUR LE BALAYAGE) */
+        /* CARTE */
         .card-container { perspective: 2000px; width: 100%; max-width: 340px; flex-grow: 1; max-height: 35vh; min-height: 200px; margin: 20px 0; }
         #card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         #card.flipped { transform: rotateY(180deg); }
@@ -47,9 +47,10 @@
         /* QUIZ OPTIONS */
         #quiz-options { display: flex; gap: 10px; width: 100%; max-width: 380px; margin-bottom: 20px; }
         .quiz-btn { flex: 1; padding: 18px 5px; border-radius: 18px; border: 2px solid var(--border); border-bottom-width: 5px; background: var(--card-front); color: var(--text-main); font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.1s; }
-        .quiz-btn:active { border-bottom-width: 2px; transform: translateY(3px); }
+        .quiz-btn:active:not(.disabled) { border-bottom-width: 2px; transform: translateY(3px); }
         .correct { background-color: #22c55e !important; border-color: #16a34a !important; color: white !important; }
         .wrong { background-color: #ef4444 !important; border-color: #dc2626 !important; color: white !important; animation: shake 0.3s; }
+        .disabled { opacity: 0.7; cursor: default; }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
         
@@ -92,16 +93,16 @@
         <div id="count">0 / 0</div>
         <div class="controls">
             <button class="btn-tool" onclick="change(-1)">⬅️</button>
-            <button class="btn-tool" style="width: auto; padding: 0 20px; font-size: 12px; font-weight: 800;" onclick="melanger()">MIX</button>
+            <button class="btn-tool" style="width: auto; padding: 0 20px; font-size: 11px; font-weight: 800;" onclick="melanger()">MIX</button>
             <button class="btn-tool" onclick="change(1)">➡️</button>
         </div>
     </div>
 
     <script src="donnees.js"></script>
     <script>
-        let index = 0, liste = [], streak = 0, vies = 3;
+        // --- VARIABLES ---
+        let index = 0, liste = [], streak = 0, vies = 3, dejaRepondu = false;
 
-        // Fonction Sonore
         function jouerSon(type) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -115,7 +116,6 @@
             } catch(e) {}
         }
 
-        // Chargement initial
         function charger() {
             if (typeof dictionnaireGeant !== 'undefined') {
                 liste = [...dictionnaireGeant].sort(() => Math.random() - 0.5);
@@ -123,14 +123,13 @@
             }
         }
 
-        // Mise à jour de la carte (CORRIGÉ POUR ÉVITER LE BALAYAGE)
         function MAJ() {
             if (!liste.length) return;
             
-            // 1. On remet la carte à l'endroit AVANT de changer le texte
+            // On déverrouille pour la nouvelle carte
+            dejaRepondu = false; 
             document.getElementById('card').classList.remove('flipped');
 
-            // 2. On attend la fin de l'animation de retournement (ou un petit délai)
             setTimeout(() => {
                 const m = liste[index];
                 document.getElementById('ar').textContent = m.arabe;
@@ -141,13 +140,10 @@
             }, 200); 
         }
 
-        // Génération du Quiz
         function genererQuiz(bonneReponse) {
             const container = document.getElementById('quiz-options');
             container.innerHTML = "";
             let choix = [bonneReponse];
-            
-            // On s'assure d'avoir assez de mots dans le dictionnaire
             let pool = dictionnaireGeant.length > 3 ? dictionnaireGeant : liste;
             
             while (choix.length < 3) {
@@ -165,22 +161,28 @@
             });
         }
 
-        // Vérification de la réponse
         function verifier(btn, texte, bonne) {
-            if (vies <= 0) return;
+            // VERROU : Si déjà fini ou plus de vies, on ne fait rien
+            if (vies <= 0 || dejaRepondu) return;
 
             if (texte === bonne) {
-                if (!btn.classList.contains('correct')) {
-                    btn.classList.add('correct');
-                    jouerSon('correct');
-                    streak++;
-                    if (streak > 0 && streak % 10 === 0) animerBravo();
-                    MAJStats();
-                    // On retourne la carte pour montrer la réponse
-                    setTimeout(() => { document.getElementById('card').classList.add('flipped'); }, 200);
-                }
+                // On active le verrou immédiatement
+                dejaRepondu = true; 
+                
+                btn.classList.add('correct');
+                jouerSon('correct');
+                streak++;
+                
+                // Désactiver visuellement les autres boutons
+                document.querySelectorAll('.quiz-btn').forEach(b => {
+                    if (b !== btn) b.classList.add('disabled');
+                });
+
+                if (streak > 0 && streak % 10 === 0) animerBravo();
+                MAJStats();
+                setTimeout(() => { document.getElementById('card').classList.add('flipped'); }, 200);
             } else {
-                if (!btn.classList.contains('wrong') && !btn.classList.contains('correct')) {
+                if (!btn.classList.contains('wrong')) {
                     btn.classList.add('wrong');
                     jouerSon('wrong');
                     vies--;
@@ -229,11 +231,7 @@
 
         function filtrer() {
             const s = document.getElementById('recherche').value.toLowerCase();
-            if (s === "") {
-                liste = [...dictionnaireGeant];
-            } else {
-                liste = dictionnaireGeant.filter(m => m.francais.toLowerCase().includes(s) || m.arabe.includes(s));
-            }
+            liste = dictionnaireGeant.filter(m => m.francais.toLowerCase().includes(s) || m.arabe.includes(s));
             index = 0; 
             MAJ();
         }

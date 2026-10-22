@@ -686,7 +686,7 @@ function finish(failed){
   $('#l-body').innerHTML=`<div class="sum"><div class="trophy">${failed?'💔':(acc>=90?'🏆':'🌟')}</div>
     <h1>${failed?'Plus de vies':'Leçon terminée'}</h1><div class="mute">${failed?'Reprends avec les mots ci-dessous.':(bonus?'Bonus de '+bonus+' XP':'')}</div>
     <div class="sumgrid"><div><b>+${gained}</b><span>XP</span></div><div><b>${acc}%</b><span>de réussite</span></div><div><b>${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}</b><span>durée</span></div></div>
-    ${learnedNow?`<div class="chip gold" style="margin-bottom:10px">🌱 ${learnedNow} nouveau${learnedNow>1?'x':''} mot${learnedNow>1?'s':''} appris${learnedNow>1?'s':''}</div>`:''}
+    ${learnedNow?`<div class="chip gold" style="margin-bottom:10px">🌱 ${learnedNow} nouveau${learnedNow>1?'x':''} mot${learnedNow>1?'s':''} appris</div>`:''}
     ${missed.length?`<h2 class="missed">À retenir</h2><div class="missed">${missed.map(w=>`<button class="wrow" data-act="speak" data-id="${w.id}"><span class="a ar">${esc(showAr(w.ar))}</span><span class="f"><b>${esc(w.fr)}</b></span><span>🔊</span></button>`).join('')}</div>`:''}</div>`;
   $('#l-foot').innerHTML=`<div class="l-foot"><button class="btn" data-act="again" data-mode="${L.mode}">${failed?'Réessayer':'Nouvelle leçon'}</button><button class="btn ghost" style="margin-top:10px" data-act="close">Retour à l'accueil</button></div>`;
 }

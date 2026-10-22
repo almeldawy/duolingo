@@ -1,10 +1,11 @@
 // Incrémente ce numéro à chaque modification des fichiers pour forcer la mise à jour chez les utilisateurs
-const CACHE_NAME = 'arabe-v3';
+const CACHE_NAME = 'arabe-v4';
 
 const ASSETS = [
   './',
   './index.html',
   './donnees.js',
+  './phrases.js',
   './manifest.json',
   './web-app-manifest-192x192.png',
   './web-app-manifest-512x512.png',
